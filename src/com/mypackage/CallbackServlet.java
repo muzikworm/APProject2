@@ -2,24 +2,26 @@ package com.mypackage;
 
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.mypackage.dao.FBUser;
+import com.mypackage.dao.StopWords;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.json.JsonArray;
 import com.restfb.json.JsonObject;
-import com.restfb.types.Album;
-import com.restfb.types.Likes;
-import com.restfb.types.Photo;
 import com.restfb.types.Post;
 import com.restfb.types.User;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -31,13 +33,13 @@ import java.util.List;
 public class CallbackServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
-    private static String getAccessTokenFromWebContent (String webContent) {
-    	String accessToken = null;
-    	int s = webContent.indexOf("access_token=") + ("access_token=".length());
-        int e = webContent.indexOf("&");
-        accessToken = webContent.substring(s, e);
-        return accessToken;
-    }
+//    private static String getAccessTokenFromWebContent (String webContent) {
+//    	String accessToken = null;
+//    	int s = webContent.indexOf("access_token=") + ("access_token=".length());
+//        int e = webContent.indexOf("&");
+//        accessToken = webContent.substring(s, e);
+//        return accessToken;
+//    }
     
     
     private static String getWebContentFromURL(String webnames) {
@@ -68,7 +70,7 @@ public class CallbackServlet extends HttpServlet {
         String accessURL = null;
     	String accessToken = null;
     	String webContent = null;
-        
+    	System.out.println("My accesss token"+request.getParameter("accesstoken_html"));
         try {
             StringBuffer redirectURLbuffer = request.getRequestURL();
             int index = redirectURLbuffer.lastIndexOf("/");
@@ -83,39 +85,52 @@ public class CallbackServlet extends HttpServlet {
         		System.out.println("accessURL: " + accessURL);
         		webContent = getWebContentFromURL(accessURL);
         		System.out.println("accessURL: " + webContent);
-        		accessToken = "CAACEdEose0cBAFa3PbTHLBqqN4cum5vYBmK0UJsMQ69HeiLvm06BrqoZBKBOr6OR7QHOt9qBelIh0aM78uvywAiRK07EZAwLJR914wwNWTW5JZCeZBiCTEY8jW6kXzDXRoscgrsd25vfOsayludhFyO9MMZAr8v1fu6XowXmL4OLl0chovdGlBWkrDnlfMxfHDm2j5YEKQjTCQRO964S0";
+        		
+        		accessToken = "CAACEdEose0cBAN9luzIZClZAZB7TrO1GKCLbWnZAS65JG3W7RZA4aHFqmo85Nf63lPisDDCfWAjVJATtDBdm2sjmkWrYmhBWgYqW5b15lQBIOpewZBr9o9guZCxZAZCRGZAK4ah0nap91B2xpFBD3JJhw5IpaurpHaiUEEtsPZCgmfT2FlfODJP9rnTcv1ZACbZCQyF0ZCNkGdkIZCTl3nH6kCXqJx5";
         	} else {
         		response.sendRedirect(request.getContextPath() + "/error.html");
         		return;
         	}
         	
-            if(accessToken!=null) {
+        	
+        	
+            
+        	if(accessToken!=null) {
             	System.out.println("accessToken: " + accessToken);
             	@SuppressWarnings("deprecation")
 				FacebookClient facebookClient = new DefaultFacebookClient(accessToken);
             	User user = facebookClient.fetchObject("me", User.class);
-            	FBUser fbUser = new FBUser(user.getId(),user.getName());
-            	Post album= new Post();
-            	request.getSession().setAttribute("fbUser", fbUser);
+            	
+            	ArrayList <Long> countlist= new ArrayList<Long>();
+            	ArrayList <String> des= new ArrayList <String>();
             	Connection<Post> myFeed = facebookClient.fetchConnection("me/feed", Post.class,Parameter.with("type", "post"));
-				
-					for (List<Post> myFeedConnectionPage : myFeed)
+	            for (List<Post> myFeedConnectionPage : myFeed)
 					{	
-						
 						for (Post post : myFeedConnectionPage)
 						  { 
+							try{
+								//System.out.println("Post ID: "+post.getId());
+								
 							
-							System.out.println("Post ID: "+post.getId()+post.getLikes());
-						    JsonObject jsonObject = facebookClient.fetchObject(post.getId() + "/likes",JsonObject.class, Parameter.with("summary", true),Parameter.with("limit", 1));
+							JsonObject jsonObject = facebookClient.fetchObject(post.getId() + "/likes",JsonObject.class, Parameter.with("summary", true),
+					                        Parameter.with("limit", 1));
 					        long count = jsonObject.getJsonObject("summary").getLong("total_count");
-					        System.out.println("count : "+count);
-					         
-							
-						}
+					       // System.out.println("Likes : "+count);
+					        countlist.add(count);
+					        if(post.getDescription().toString()!=null)
+					        {
+					        	des.add(post.getDescription().toString());
+					        }
+					        
+							}catch (Exception e)
+							{}
+						  }
 				}
             	
-				
-				
+				long likesaverage=datainterpretationaveragelikes(countlist);
+				datainterpretation(des,countlist);
+				FBUser fbUser = new FBUser(user.getId(),user.getName(),likesaverage);
+            	request.getSession().setAttribute("fbUser", fbUser);
             	System.out.println(user.getId()+" "+user.getName());
             	
             	response.sendRedirect(request.getContextPath() + "/welcome.jsp");
@@ -129,5 +144,37 @@ public class CallbackServlet extends HttpServlet {
             throw new ServletException(e);
         }
         
+    }
+ 
+ 
+
+	private long datainterpretationaveragelikes(ArrayList<Long> countlist) {
+		// TODO Auto-generated method stub
+		int post=countlist.size();
+		long likesum=0;
+		int i=0;
+		while(i<post)
+		{ 
+			likesum=likesum+countlist.get(i);
+		    i++;	
+		}
+		
+		return (likesum/post);
+	}
+
+	
+
+	void datainterpretation(ArrayList<String> list, ArrayList<Long> countlist)
+    {
+		int i=0;
+		while(i<list.size())
+		{
+			StopWords remove= new StopWords();
+	    	String result=remove.removeStopWords(list.get(i));
+	    	list.remove(i);
+	    	list.add(i, result);
+	    	i++;
+		}
+    	
     }
 }

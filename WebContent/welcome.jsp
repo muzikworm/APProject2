@@ -51,7 +51,7 @@
 </head>
 <body>
 	<div class="container">
-		<h1>Facebook Login Using Java Servlets</h1>
+		<h1>Results</h1>
 		
 		<div id="auth-status">
 			<div id="auth-loggedin" style="width:250px; margin:0px auto;">
@@ -60,7 +60,7 @@
 					<br/><br/>
 					<b>Id: </b>${fbUser.id}<br/>
 					<b>Full Name: </b>${fbUser.name}<br/>
-					
+					<b>TotalNumberOflikes/TotalNumberOfPosts: </b>${fbUser.likesaverage}<br/>
 					<br/><br/>					
 				</div>
 				<br/>
