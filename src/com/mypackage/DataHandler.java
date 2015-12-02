@@ -1,5 +1,8 @@
 package com.mypackage;
-
+/*
+ * @Author1 : Kunal Sharma 2014054
+ * @Author2 : Sahil Ruhela 2014092
+ */
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,7 +14,7 @@ public class DataHandler {
  long datainterpretationaveragelikes(ArrayList<Long> countlist) {
 		// TODO Auto-generated method stub
 		int post=countlist.size();
-		long likesum=0;
+		long likesum=1;
 		int i=0;
 		while(i<post)
 		{ 

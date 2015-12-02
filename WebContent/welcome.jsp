@@ -64,8 +64,8 @@
 					<b>TotalNumberOflikes/TotalNumberOfPosts: </b>${fbUser.likesaverage}<br/>
 					<b>Check Console for post specific likes </b></br>
 					<b> Post type specific results</b></br>
-					<c:forEach var="country" items="${capitalList}">
-					    Country: ${country.key}  - Capital: ${country.value}
+					<c:forEach var="country" items="${fbUser.map}">
+					   Post Type: ${country.key} - AverageLike: ${country.value}<br/>
 					</c:forEach>
 					<br/><br/>					
 				</div>

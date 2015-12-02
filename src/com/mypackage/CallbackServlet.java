@@ -1,6 +1,9 @@
 package com.mypackage;
 
-
+/*
+ * @Author1 : Kunal Sharma 2014054
+ * @Author2 : Sahil Ruhela 2014092
+ */
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -29,7 +32,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-
+@WebServlet("/callbackServlet")
 public class CallbackServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
@@ -39,7 +42,7 @@ public class CallbackServlet extends HttpServlet {
 //        int e = webContent.indexOf("&");
 //        accessToken = webContent.substring(s, e);
 //        return accessToken;
-//    }
+//        }
     
     
     private static String getWebContentFromURL(String webnames) {
@@ -61,7 +64,7 @@ public class CallbackServlet extends HttpServlet {
         }
     	return null;
     }
-
+   
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     	String code = null;
         String facebookAppId = getServletContext().getInitParameter("facebookAppId");
@@ -86,7 +89,7 @@ public class CallbackServlet extends HttpServlet {
         		webContent = getWebContentFromURL(accessURL);
         	
         		
-        		accessToken = "CAACEdEose0cBADSBZBjTOg5OmI6vWlAx2eZCjXho4zxcm5SzTEdhGPsCGnXfu24LPZCgfdcvJxDItVhjEgO07nfqRWbiZAtEIX8Xh1ukwI58bdpCuUqoXoEgj2TdirizXHxZB0XnN04Nc6P1FE0WSS9JokC2fTpBOryhj3y3e3duRTvJsOSIePZCT7mneOLvrC3qdvQsT8bR2MIbVZC8vNJ";
+        		accessToken = "CAACEdEose0cBAA2TBlFrQhZCJd2X8Kq8CXCTHGpwThV9sMFDQprLW8ZAJPfdZAFdeSZAnRBR88zZBBqKStFIq4WIw5G4bp7zP6U8sa7K08xXwtK7syuNBHcuVmaCAtdnV7IINAfGATF2kbGhuZCwWbPxvlU1ckyDze2cX0SIJnovAzuUyMrQhjCQYJI3rtlvZCHZCvY9kFVZCTA9bJEJvVcxZA";
         	} else {
         		response.sendRedirect(request.getContextPath() + "/error.html");
         		return;
