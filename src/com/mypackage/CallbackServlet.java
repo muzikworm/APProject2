@@ -70,7 +70,7 @@ public class CallbackServlet extends HttpServlet {
         String accessURL = null;
     	String accessToken = null;
     	String webContent = null;
-    	System.out.println("My accesss token"+request.getParameter("accesstoken_html"));
+    	
         try {
             StringBuffer redirectURLbuffer = request.getRequestURL();
             int index = redirectURLbuffer.lastIndexOf("/");
@@ -79,24 +79,23 @@ public class CallbackServlet extends HttpServlet {
             
         	code = request.getParameter("code");
         	if(null!=code) {
-        		System.out.println("Code: " + code);
+        		
         		accessURL = "https://graph.facebook.com/oauth/access_token?client_id=" + facebookAppId + 
         				"&redirect_uri=" + redirectURL + "&client_secret=" + facebookAppSecret + "&code=" + code;
-        		System.out.println("accessURL: " + accessURL);
-        		webContent = getWebContentFromURL(accessURL);
-        		System.out.println("accessURL: " + webContent);
         		
-        		accessToken = "CAACEdEose0cBAN9luzIZClZAZB7TrO1GKCLbWnZAS65JG3W7RZA4aHFqmo85Nf63lPisDDCfWAjVJATtDBdm2sjmkWrYmhBWgYqW5b15lQBIOpewZBr9o9guZCxZAZCRGZAK4ah0nap91B2xpFBD3JJhw5IpaurpHaiUEEtsPZCgmfT2FlfODJP9rnTcv1ZACbZCQyF0ZCNkGdkIZCTl3nH6kCXqJx5";
+        		webContent = getWebContentFromURL(accessURL);
+        	
+        		
+        		accessToken = "CAACEdEose0cBADSBZBjTOg5OmI6vWlAx2eZCjXho4zxcm5SzTEdhGPsCGnXfu24LPZCgfdcvJxDItVhjEgO07nfqRWbiZAtEIX8Xh1ukwI58bdpCuUqoXoEgj2TdirizXHxZB0XnN04Nc6P1FE0WSS9JokC2fTpBOryhj3y3e3duRTvJsOSIePZCT7mneOLvrC3qdvQsT8bR2MIbVZC8vNJ";
         	} else {
         		response.sendRedirect(request.getContextPath() + "/error.html");
         		return;
         	}
         	
         	
-        	
+        	DataHandler data= new DataHandler();
             
         	if(accessToken!=null) {
-            	System.out.println("accessToken: " + accessToken);
             	@SuppressWarnings("deprecation")
 				FacebookClient facebookClient = new DefaultFacebookClient(accessToken);
             	User user = facebookClient.fetchObject("me", User.class);
@@ -109,17 +108,22 @@ public class CallbackServlet extends HttpServlet {
 						for (Post post : myFeedConnectionPage)
 						  { 
 							try{
-								//System.out.println("Post ID: "+post.getId());
-								
+							//System.out.println("Post ID: "+post.getId()+" Type: "+ post.getType());
 							
-							JsonObject jsonObject = facebookClient.fetchObject(post.getId() + "/likes",JsonObject.class, Parameter.with("summary", true),
-					                        Parameter.with("limit", 1));
+							
+							JsonObject jsonObject = facebookClient.fetchObject(post.getId() + "/likes",JsonObject.class, Parameter.with("summary", true),Parameter.with("limit", 1000));
 					        long count = jsonObject.getJsonObject("summary").getLong("total_count");
 					       // System.out.println("Likes : "+count);
 					        countlist.add(count);
+					        data.databytype(post.getType(),count);
+					        data.databytypenumber(post.getType());
 					        if(post.getDescription().toString()!=null)
 					        {
 					        	des.add(post.getDescription().toString());
+					        }
+					        else if(post.getDescription().toString()==null)
+					        {
+					        	des.add(" NULL");
 					        }
 					        
 							}catch (Exception e)
@@ -127,10 +131,14 @@ public class CallbackServlet extends HttpServlet {
 						  }
 				}
             	
-				long likesaverage=datainterpretationaveragelikes(countlist);
-				datainterpretation(des,countlist);
-				FBUser fbUser = new FBUser(user.getId(),user.getName(),likesaverage);
+	            
+				long likesaverage=data.datainterpretationaveragelikes(countlist);
+				data.datainterpretation(des,countlist);
+                data.manipulate();
+    
+				FBUser fbUser = new FBUser(user.getId(),user.getName(),likesaverage,data.finalhashmap);
             	request.getSession().setAttribute("fbUser", fbUser);
+            	request.getSession().setAttribute("finalmap",data.finalhashmap);
             	System.out.println(user.getId()+" "+user.getName());
             	
             	response.sendRedirect(request.getContextPath() + "/welcome.jsp");
@@ -148,33 +156,5 @@ public class CallbackServlet extends HttpServlet {
  
  
 
-	private long datainterpretationaveragelikes(ArrayList<Long> countlist) {
-		// TODO Auto-generated method stub
-		int post=countlist.size();
-		long likesum=0;
-		int i=0;
-		while(i<post)
-		{ 
-			likesum=likesum+countlist.get(i);
-		    i++;	
-		}
-		
-		return (likesum/post);
-	}
-
 	
-
-	void datainterpretation(ArrayList<String> list, ArrayList<Long> countlist)
-    {
-		int i=0;
-		while(i<list.size())
-		{
-			StopWords remove= new StopWords();
-	    	String result=remove.removeStopWords(list.get(i));
-	    	list.remove(i);
-	    	list.add(i, result);
-	    	i++;
-		}
-    	
-    }
 }

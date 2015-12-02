@@ -1,4 +1,5 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@ taglib  uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -52,7 +53,7 @@
 <body>
 	<div class="container">
 		<h1>Results</h1>
-		
+		 <h2>Prepared by: Kunal Sharma</h2>
 		<div id="auth-status">
 			<div id="auth-loggedin" style="width:250px; margin:0px auto;">
 				<div id="auth-display-name">${fbUser.name}</div><br/><br/>
@@ -61,6 +62,11 @@
 					<b>Id: </b>${fbUser.id}<br/>
 					<b>Full Name: </b>${fbUser.name}<br/>
 					<b>TotalNumberOflikes/TotalNumberOfPosts: </b>${fbUser.likesaverage}<br/>
+					<b>Check Console for post specific likes </b></br>
+					<b> Post type specific results</b></br>
+					<c:forEach var="country" items="${capitalList}">
+					    Country: ${country.key}  - Capital: ${country.value}
+					</c:forEach>
 					<br/><br/>					
 				</div>
 				<br/>

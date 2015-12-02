@@ -27,10 +27,10 @@
 <body>
  	<div class="container">
 		<h1>LikeAverage</h1>
-		<form name="accesstoken_form" action="callback" method="get">
+		<form name="accesstoken_form" action="CallbackServlet" method="get">
          Access Token: <input name="closure" type="text" name="accesstoken_html">
-         
-         <a href="login">Click To continue</a>
+         <a href="login" onclick="$(this).closest('form').submit()">Submit Link</a>
+        
 		</form>	
 	</div>
 </body>
